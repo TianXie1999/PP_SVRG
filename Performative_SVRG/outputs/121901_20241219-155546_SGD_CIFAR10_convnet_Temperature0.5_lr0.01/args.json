@@ -1,0 +1,1 @@
+{"optimizer": "SGD", "nn_model": "CIFAR10_convnet", "dataset": "CIFAR10", "n_epoch": 100, "lr": 0.01, "batch_size": 64, "weight_decay": 0.0, "exp_name": "121901", "print_every": 1, "ratio": 1.0, "temperature": 0.5}
