@@ -1,0 +1,1 @@
+{"optimizer": "SVRG", "nn_model": "MNIST_one_layer", "dataset": "MNIST", "n_epoch": 100, "lr": 0.01, "batch_size": 128, "weight_decay": 0.0, "exp_name": "exp_15", "print_every": 1, "ratio": 0.43}
