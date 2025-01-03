@@ -12,8 +12,14 @@ parser.add_argument('--CIFAR10_SGD_lr_search', action='store_true')
 parser.add_argument('--CIFAR10_SVRG_lr_search', action='store_true')
 parser.add_argument('--CIFAR10_SGD_small_batch_lr_search', action='store_true')
 parser.add_argument('--CIFAR10_SVRG_small_batch_lr_search', action='store_true')
+parser.add_argument('--CIFAR100_SGD_lr_search', action='store_true')
+parser.add_argument('--CIFAR100_SVRG_lr_search', action='store_true')
+parser.add_argument('--CIFAR100_SGD_small_batch_lr_search', action='store_true')
+parser.add_argument('--CIFAR100_SVRG_small_batch_lr_search', action='store_true')
 
-LR_RANGE = [0.1, 0.03, 0.01, 0.003, 0.001]
+
+# LR_RANGE = [0.1, 0.03, 0.01, 0.003, 0.001]
+LR_RANGE = [0.03]
 
 def SGD_lr_search():
     arg_list_template = [
@@ -179,6 +185,23 @@ def CIFAR10_SVRG_small_batch_lr_search():
         '--dataset', 'CIFAR10',
         '--n_epoch', '100',
         '--batch_size', '16',
+        '--weight_decay', '0.0001', 
+        '--lr']
+    for lr in LR_RANGE:
+        arg_list = arg_list_template + [str(lr)]
+        command = ' '.join(arg_list)
+        print(command)
+        os.system(command)
+        
+def CIFAR100_SGD_lr_search():
+    arg_list_template = [
+        'python', 'run_svrg.py', 
+        '--exp_name', 'CIFAR100_SGD_lr_search',
+        '--optimizer', 'SGD', 
+        '--nn_model', 'CIFAR100_convnet',
+        '--dataset', 'CIFAR100',
+        '--n_epoch', '100',
+        '--batch_size', '128',
         '--weight_decay', '0.0001', 
         '--lr']
     for lr in LR_RANGE:

@@ -13,9 +13,9 @@ class SVRG_k(Optimizer):
         print("Using optimizer: SVRG")
         self.u = None
         if lr < 0.0:
-            raise ValueError("Invalid learning rate: {}".format(lr))
+            raise ValueError(f"Invalid learning rate: {lr}")
         if weight_decay < 0.0:
-            raise ValueError("Invalid weight decay: {}".format(weight_decay))
+            raise ValueError(f"Invalid weight decay: {weight_decay}")
         defaults = dict(lr=lr, weight_decay=weight_decay)
         super(SVRG_k, self).__init__(params, defaults)
     
@@ -57,7 +57,7 @@ class SVRG_Snapshot(Optimizer):
         lr (float): learning rate
     """
     def __init__(self, params):
-        defaults = dict()
+        defaults = {}
         super(SVRG_Snapshot, self).__init__(params, defaults)
       
     def get_param_groups(self):

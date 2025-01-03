@@ -11,9 +11,9 @@ class SGD_Simple(Optimizer):
     def __init__(self, params, lr, weight_decay=0):
         print("Using optimizer: SGD_Simple")
         if lr < 0.0:
-            raise ValueError("Invalid learning rate: {}".format(lr))
+            raise ValueError(f"Invalid learning rate: {lr}")
         if weight_decay < 0.0:
-            raise ValueError("Invalid weight decay: {}".format(weight_decay))
+            raise ValueError(f"Invalid weight decay: {weight_decay}")
 
         defaults = dict(lr=lr, weight_decay=weight_decay)
         
