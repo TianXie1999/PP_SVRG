@@ -24,12 +24,12 @@ class SGD_Simple(Optimizer):
         """
         for group in self.param_groups:
             weight_decay = group['weight_decay']
-
+            lr = group['lr']
             for p in group['params']:
                 if p.grad is None:
                     continue
+                
                 d_p = p.grad.data
                 if weight_decay != 0:
-                    d_p.add_(weight_decay, p.data)
-                    
-                p.data.add_(-group['lr'], d_p)
+                    d_p.add_(p.data, alpha=weight_decay)    
+                p.data.add_(-lr, d_p)

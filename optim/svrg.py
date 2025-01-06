@@ -1,5 +1,6 @@
-from torch.optim import Optimizer
 import copy
+import torch
+from torch.optim import Optimizer
 
 
 class SVRG_k(Optimizer):
@@ -20,33 +21,37 @@ class SVRG_k(Optimizer):
         super(SVRG_k, self).__init__(params, defaults)
     
     def get_param_groups(self):
-            return self.param_groups
+        return self.param_groups
 
     def set_u(self, new_u):
         """Set the mean gradient for the current epoch. 
         """
         if self.u is None:
-            self.u = copy.deepcopy(new_u)
+            # self.u = copy.deepcopy(new_u)
+            self.u = [{'params': [torch.zeros_like(p) for p in group['params']]} for group in new_u]
         for u_group, new_group in zip(self.u, new_u):  
             for u, new_u in zip(u_group['params'], new_group['params']):
-                u.grad = new_u.grad.clone()
+                # u.grad = new_u.grad.clone()
+                u.copy_(new_u.grad)
 
     def step(self, params):
         """Performs a single optimization step.
         """
-        for group, new_group, u_group in zip(self.param_groups, params, self.u):
-            weight_decay = group['weight_decay']
-
-            for p, q, u in zip(group['params'], new_group['params'], u_group['params']):
-                if p.grad is None:
-                    continue
-                if q.grad is None:
-                    continue
-                # core SVRG gradient update 
-                new_d = p.grad.data - q.grad.data + u.grad.data
-                if weight_decay != 0:
-                    new_d.add_(weight_decay, p.data)
-                p.data.add_(-group['lr'], new_d)
+        with torch.no_grad():
+            for group, new_group, u_group in zip(self.param_groups, params, self.u):
+                weight_decay = group['weight_decay']
+                lr = group['lr']
+                for p, q, u in zip(group['params'], new_group['params'], u_group['params']):
+                    if p.grad is None or q.grad is None:
+                        continue
+                    # core SVRG gradient update 
+                    # new_d = p.grad.data - q.grad.data + u.grad.data
+                    new_d = p.grad.data - q.grad.data + u
+                    # print l1 norm of the p q u
+                    print(torch.norm(p), torch.norm(q), torch.norm(u))
+                    if weight_decay != 0:
+                        new_d.add_(p.data, alpha=weight_decay)
+                    p.data.add_(-lr, new_d)
 
 
 class SVRG_Snapshot(Optimizer):

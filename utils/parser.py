@@ -3,7 +3,8 @@ import argparse
 
 def get_args():
     parser = argparse.ArgumentParser(description="Train SVRG/SGD on MNIST data.")
-    parser.add_argument('--optimizer', type=str, default="SVRG",
+    # only sgd and svrg are supported
+    parser.add_argument('--optimizer', type=str, default="SGD", choices=["SGD", "SVRG"],
                         help="optimizer.")
     parser.add_argument('--nn_model', type=str, default="MNIST_one_layer",
                         help="neural network model.")
@@ -27,4 +28,10 @@ def get_args():
                         help="temperature for softmax.")
     parser.add_argument('--loss_type', type=str, default="cross_entropy", 
                         help="loss function.")
+    parser.add_argument('--output_dir', type=str, default="outputs",
+                        help="output directory.")
+    parser.add_argument('--device', type=str, default="cpu")
+    parser.add_argument('--log', action='store_true',
+                        default=False,
+                        help="whether log the results.")
     return parser.parse_args()

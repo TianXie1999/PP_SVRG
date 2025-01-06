@@ -1,5 +1,3 @@
-from .mnist_models import MNIST_ConvNet, MNIST_one_layer, MNIST_two_layers
-from .cifar10_models import CIFAR10_ConvNet
-from .cifar100_models import CIFAR100_ConvNet
+from .model_factory import initialize_model
 
-__all__ = ["CIFAR10_ConvNet", "MNIST_ConvNet", "MNIST_one_layer", "MNIST_two_layers"]
+__all__ = ['initialize_model']

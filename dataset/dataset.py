@@ -71,3 +71,18 @@ def CIFAR100_dataset():
     test_set = datasets.CIFAR100('data/CIFAR100', download=True, train=False, transform=transform)
     train_set = datasets.CIFAR100("data/CIFAR100", download=True, train=True, transform=transform)
     return train_set, test_set
+
+
+def load_dataset(args):
+    if args.dataset == "MNIST":
+        if args.ratio < 1:
+            train_set, val_set = MNIST_dataset_sample(p=args.ratio)
+        else:
+            train_set, val_set = MNIST_dataset()
+    elif args.dataset == "CIFAR10":
+        train_set, val_set = CIFAR10_dataset()
+    elif args.dataset == "CIFAR100":
+        train_set, val_set = CIFAR100_dataset()
+    else:
+        raise ValueError("Unknown dataset")
+    return train_set, val_set

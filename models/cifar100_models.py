@@ -19,3 +19,7 @@ class CIFAR100_ConvNet(nn.Module):
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
+    
+def get_ResNet18():
+    import torchvision.models as models
+    return models.resnet18(num_classes=100)
