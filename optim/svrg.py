@@ -48,10 +48,10 @@ class SVRG_k(Optimizer):
                     # new_d = p.grad.data - q.grad.data + u.grad.data
                     new_d = p.grad.data - q.grad.data + u
                     # print l1 norm of the p q u
-                    print(torch.norm(p), torch.norm(q), torch.norm(u))
+                    # print(torch.norm(p), torch.norm(q), torch.norm(u))
                     if weight_decay != 0:
                         new_d.add_(p.data, alpha=weight_decay)
-                    p.data.add_(-lr, new_d)
+                    p.data.add_(new_d, alpha=-lr)
 
 
 class SVRG_Snapshot(Optimizer):
