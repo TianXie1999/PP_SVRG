@@ -16,7 +16,7 @@ if __name__ == "__main__":
     args = get_args()
     log_dir = setup_output_directory(args)
     
-    device = get_device()
+    device = get_device(args.device)
     
     print(vars(args))
 

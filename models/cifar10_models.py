@@ -1,5 +1,8 @@
 import torch.nn as nn
 import torch.nn.functional as F
+import torchvision.models as models
+
+
 class CIFAR10_ConvNet(nn.Module):
     def __init__(self):
         super(CIFAR10_ConvNet, self).__init__()
@@ -18,3 +21,6 @@ class CIFAR10_ConvNet(nn.Module):
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
+    
+def get_cifar10_ResNet18():
+    return models.resnet18(num_classes=10)

@@ -13,13 +13,14 @@ from .metric import accuracy
 def train_one_epoch(model, optimizer, train_loader, train_loader_large, start_weights,
                     metric, loss_fn, model_snapshot=None, optimizer_snapshot=None,
                     temperature=0.5, optimize='SGD', device='cpu'):
+
     if optimize == 'SVRG':
         g = calculate_full_gradient(model_snapshot, train_loader, start_weights, loss_fn, 
                                     optimizer_snapshot, device)
     elif optimize == 'SGD':
         g = calculate_full_gradient(model, train_loader, start_weights, loss_fn, optimizer,
                                     device)
-    
+
     metric['grad'].update(g)
     
     if optimize == 'SVRG':
@@ -29,6 +30,7 @@ def train_one_epoch(model, optimizer, train_loader, train_loader_large, start_we
     
     weights = start_weights
     print("total iterations:", len(train_loader))
+
     for i, (images, labels) in enumerate(train_loader):
         if i % 10 == 0:
             print("Iteration: ", i)
@@ -50,7 +52,7 @@ def train_one_epoch(model, optimizer, train_loader, train_loader_large, start_we
         else:
             optimizer.step()  
         # Update weights
-        label_weights = torch.tensor([weights[label] for label in weights.keys()], dtype=torch.float32).to(device)
+        # label_weights = torch.tensor([weights[label] for label in weights.keys()], dtype=torch.float32).to(device)
         
         with torch.no_grad():
             weights = update_weights(model, train_loader_large, loss_fn, 
@@ -61,6 +63,7 @@ def train_one_epoch(model, optimizer, train_loader, train_loader_large, start_we
         # Log metrics
         acc = accuracy(yhat.cpu(), labels)
         log_metrics(loss_iter, acc, metric)
+    time3 = time.time()
     
     if optimize == 'SVRG':
         optimizer_snapshot.set_param_groups(optimizer.get_param_groups())
