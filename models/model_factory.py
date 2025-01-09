@@ -5,7 +5,7 @@ from .mnist_models import MNIST_one_layer, MNIST_two_layers, MNIST_ConvNet
 model_dict = {
         "mnist_one_layer": MNIST_one_layer,
         "mnist_two_layers": MNIST_two_layers,
-        "mnist_ConvNet": MNIST_ConvNet,
+        "mnist_convnet": MNIST_ConvNet,
         "cifar10_convnet": CIFAR10_ConvNet,
         "cifar10_resnet18": get_cifar10_ResNet18,
         "cifar100_resnet18": get_cifar100_ResNet18,

@@ -5,7 +5,7 @@ Implementation of **stochastic variance reduction gradient descent (SVRG)** for 
 
 template for running with SGD
 ```bash
-python main.py --optimizer SGD --lr 0.001 --log
+python main.py --optimizer SGD --dataset MNIST --nn_model one_layer --lr 0.001 --device 0 --log
 ```
 
 template for running with SVRG

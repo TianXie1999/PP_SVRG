@@ -80,20 +80,21 @@ def train_model(model, model_snapshot, optimizer, optimizer_snapshot, train_load
         'acc': AverageCalculator(),
         'grad': AverageCalculator(),
     }
-    
+
     columns = ['epoch', 'train_loss', 'train_acc', 'weights', 'grads']
     df = pds.DataFrame(columns=columns)
 
     for epoch in range(n_epochs):
         t0 = time.time()
 
-        
+
         train_loss, train_acc, grads, new_weights = train_one_epoch(
                 model, optimizer, train_loader, train_loader_large, start_weights, metrics, 
                 loss_fn, model_snapshot, optimizer_snapshot, temperature, 
                 optimize=optimize, device=device
             )
-
+        for metric in metrics.values():
+            metric.reset()
 
         new_row = {
             'epoch': epoch,
@@ -104,7 +105,7 @@ def train_model(model, model_snapshot, optimizer, optimizer_snapshot, train_load
         }
         # use concat
         df = pds.concat([df, pds.DataFrame(new_row, index=[0])], ignore_index=True)
-
+        print(df)
 
         if epoch % print_interval == 0:
             print(f"Epoch {epoch} / {n_epochs}, train loss: {train_loss}, train acc: {train_acc}, grads: {grads}, new weights: {new_weights}, time: {time.time() - t0}")
