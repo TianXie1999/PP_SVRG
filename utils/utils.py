@@ -90,3 +90,32 @@ def calculate_full_gradient(model, train_loader, start_weights, loss_fn, optimiz
     g = ((full_grd.norm(2))**2).item()
     print("full gradient norm: ", g)
     return g
+
+def update_dataset(columns, dataloader, model, device, alpha=0.1):
+    model.eval()
+
+    dataset = dataloader.dataset  
+    
+    all_data = dataset.data.to(device)  
+    all_labels = dataset.labels.to(device)
+
+    for idx in range(0, len(dataset), dataloader.batch_size):
+        end_idx = min(idx + dataloader.batch_size, len(dataset)) 
+        i_data = all_data[idx:end_idx]
+        labels = all_labels[idx:end_idx]
+
+        i_data = i_data.clone().detach().requires_grad_(True)
+
+        outputs = model(i_data)
+        loss = F.cross_entropy(outputs, labels)
+        loss.backward()
+
+        grads = i_data.grad
+        i_data_updated = i_data.clone().detach()
+        i_data_updated[:, :columns] += alpha * grads[:, :columns]
+        dataset.data[idx:end_idx] = i_data_updated.detach().cpu()
+
+
+        
+        
+     

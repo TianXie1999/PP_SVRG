@@ -17,11 +17,7 @@ import wandb
 
 if __name__ == "__main__":
     args = get_args()
-    if args.wandb:
-        # Initialize wandb
-        import wandb
-        wandb.init(project=args.wandb_project, entity=args.wandb_entity, config=vars(args), name=f"{args.model}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}")
-        print(f"Initialized wandb with run id: {wandb.run.id}")
+    
     log_dir = setup_output_directory(args)
     
     device = get_device(args.device)

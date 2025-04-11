@@ -1,7 +1,10 @@
 import os 
 import numpy as np
+import pandas as pd
 import torch
-from torch.utils.data import Subset
+import torch.utils
+from torch.utils.data import Subset, Dataset
+
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 def MNIST_dataset():
@@ -117,6 +120,83 @@ def CIFAR100_dataset(p_sample=1):
     
     return train_set, test_set
 
+def sample_by_class(dataset, type='balanced', p_sample=1):
+    targets = np.array(dataset.targets)
+    unique_classes = np.unique(targets)
+    indices = []
+
+    if type == 'balanced':
+        for cls in unique_classes:
+            cls_indices = np.where(targets == cls)[0]
+            sampled_count = int(len(cls_indices) * p_sample)
+            sampled_indices = np.random.choice(cls_indices, sampled_count, replace=False)
+            indices.extend(sampled_indices)
+
+    elif type == 'longtail':
+        pass 
+
+def processing_credit_dataset(data_path):
+    # delete the data with NA
+    data_frame = pd.read_csv(data_path)
+    data_frame = data_frame.dropna()
+    data = np.array(data_frame)
+    data, labels = data[:, 2:], data[:, 1]
+    data[:,[1,2,-5,-3]] = data[:,[-3,-5,1,2]]
+    return data, labels
+
+    
+class CreditDataset(Dataset):
+    def __init__(self, num_samples=10000, data_type='train'):
+        super().__init__()
+        
+        path = 'data/givemesomecredit/'
+        if data_type == 'train':
+            data_path = f'{path}cs-training.csv'
+            
+        else:
+            data_path = f'{path}cs-test.csv'
+        
+        data, labels = processing_credit_dataset(data_path)
+        
+        if num_samples > len(labels):
+            raise ValueError("Requested number of samples exceeds available samples in the dataset")
+        
+        self.data = torch.tensor(data, dtype=torch.float32)
+        self.labels = torch.tensor(labels, dtype=torch.int64)
+        # the labels are two class, split 10000 into two 5000 samples
+        
+        class0_idx = np.where(labels == 0)[0]
+        class1_idx = np.where(labels == 1)[0]
+
+        half = num_samples // 2
+        print("class0_idx: ", len(class0_idx), "class1_idx: ", len(class1_idx))
+        print("half: ", half)
+
+        if len(class0_idx) < half or len(class1_idx) < half:
+            raise ValueError("Not enough samples in one of the classes to balance the dataset")
+
+        
+        sampled_class0 = np.random.choice(class0_idx, half, replace=False)
+        sampled_class1 = np.random.choice(class1_idx, half, replace=False)
+
+        
+        combined_idx = np.concatenate([sampled_class0, sampled_class1])
+        np.random.shuffle(combined_idx)
+
+        
+        self.data = torch.tensor(data[combined_idx], dtype=torch.float32)
+        self.labels = torch.tensor(labels[combined_idx], dtype=torch.int64) 
+            
+    def __len__(self):
+        return len(self.data)
+    def __getitem__(self, idx):
+        return self.data[idx], self.labels[idx]
+    
+    
+def get_credit_dataset(p_sample=1):
+    dataset = CreditDataset(num_samples=int(10000*p_sample), data_type='train')
+    train_dataset, val_dataset = torch.utils.data.random_split(dataset, [len(dataset)//2, len(dataset) - len(dataset)//2])
+    return train_dataset, val_dataset
 
 def load_dataset(args):
     if args.dataset == "MNIST":
@@ -128,6 +208,8 @@ def load_dataset(args):
         train_set, val_set = CIFAR10_dataset(p_sample=args.ratio)
     elif args.dataset == "CIFAR100":
         train_set, val_set = CIFAR100_dataset(p_sample=args.ratio)
+    elif args.dataset == "credit":
+        train_set, val_set = get_credit_dataset(p_sample=args.ratio)
     else:
         raise ValueError("Unknown dataset")
     return train_set, val_set
