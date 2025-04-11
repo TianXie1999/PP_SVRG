@@ -27,12 +27,12 @@ class SVRG_k(Optimizer):
         """Set the mean gradient for the current epoch. 
         """
         if self.u is None:
-            # self.u = copy.deepcopy(new_u)
-            self.u = [{'params': [torch.zeros_like(p) for p in group['params']]} for group in new_u]
+            self.u = copy.deepcopy(new_u)
+            # self.u = [{'params': [torch.zeros_like(p) for p in group['params']]} for group in new_u]
         for u_group, new_group in zip(self.u, new_u):  
             for u, new_u in zip(u_group['params'], new_group['params']):
-                # u.grad = new_u.grad.clone()
-                u.copy_(new_u.grad)
+                u.grad = new_u.grad.clone()
+                # u.copy_(new_u.grad)
 
     def step(self, params):
         """Performs a single optimization step.
@@ -45,10 +45,14 @@ class SVRG_k(Optimizer):
                     if p.grad is None or q.grad is None:
                         continue
                     # core SVRG gradient update 
-                    # new_d = p.grad.data - q.grad.data + u.grad.data
-                    new_d = p.grad.data - q.grad.data + u
+                    new_d = p.grad.data - q.grad.data + u.grad.data
+                    # new_d = p.grad.data - q.grad.data + u
+                    
                     # print l1 norm of the p q u
-                    # print(torch.norm(p), torch.norm(q), torch.norm(u))
+                    # print(torch.norm(p).item(), torch.norm(q).item(), torch.norm(u).item())
+                    # check p q u mean and std is highly different ?
+                    # print('mean:', p.grad.data.mean(), q.grad.data.mean(), u.grad.data.mean())
+                    # print('std:', p.grad.data.std(), q.grad.data.std(), u.grad.data.std())
                     if weight_decay != 0:
                         new_d.add_(p.data, alpha=weight_decay)
                     p.data.add_(new_d, alpha=-lr)

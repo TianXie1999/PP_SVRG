@@ -4,6 +4,7 @@ import torch
 
 import pandas as pds
 import numpy as np
+import wandb
 
 from .utils import calculate_full_gradient, calculate_loss, update_weights, log_metrics
 from .log import AverageCalculator, log_to_file
@@ -46,7 +47,7 @@ def train_one_epoch(model, optimizer, train_loader, train_loader_large, start_we
         
         if optimize == 'SVRG':
             loss2, _ = calculate_loss(model_snapshot, images, labels, weights, loss_fn, device)
-            optimizer_snapshot.zero_grad()
+            optimizer_snapshot.zero_grad()         
             loss2.backward()
             optimizer.step(optimizer_snapshot.get_param_groups())
         else:
@@ -62,17 +63,18 @@ def train_one_epoch(model, optimizer, train_loader, train_loader_large, start_we
 
         # Log metrics
         acc = accuracy(yhat.cpu(), labels)
-        log_metrics(loss_iter, acc, metric)
-    time3 = time.time()
+        log_metrics(loss_iter, acc, metric, i)
     
     if optimize == 'SVRG':
+        
         optimizer_snapshot.set_param_groups(optimizer.get_param_groups())
+        
         
     return metric['loss'].avg, metric['acc'].avg, metric['grad'].avg, weights
 
 def train_model(model, model_snapshot, optimizer, optimizer_snapshot, train_loader, 
                 train_loader_large, loss_fn, log_dir, n_epochs, optimize,
-                print_interval, temperature, device, log):
+                print_interval, temperature, device, log, use_wandb):
     
     start_weights = update_weights(model, train_loader_large, loss_fn, beta=temperature, device=device)
     metrics = {
@@ -93,8 +95,17 @@ def train_model(model, model_snapshot, optimizer, optimizer_snapshot, train_load
                 loss_fn, model_snapshot, optimizer_snapshot, temperature, 
                 optimize=optimize, device=device
             )
-        for metric in metrics.values():
-            metric.reset()
+        if use_wandb:
+            wandb.log({
+                'epoch': epoch,
+                'train_loss': train_loss,
+                'train_acc': train_acc,
+                'grads': grads,
+                'weights': new_weights
+            })
+
+        # for metric in metrics.values():
+        #     metric.reset()
 
         new_row = {
             'epoch': epoch,
@@ -109,6 +120,8 @@ def train_model(model, model_snapshot, optimizer, optimizer_snapshot, train_load
 
         if epoch % print_interval == 0:
             print(f"Epoch {epoch} / {n_epochs}, train loss: {train_loss}, train acc: {train_acc}, grads: {grads}, new weights: {new_weights}, time: {time.time() - t0}")
+            
+            
 
         start_weights = new_weights
 

@@ -3,3 +3,4 @@ data/
 *.npz
 *.json
 outputs/
+wandb/

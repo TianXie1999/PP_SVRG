@@ -32,4 +32,4 @@ class SGD_Simple(Optimizer):
                 d_p = p.grad.data
                 if weight_decay != 0:
                     d_p.add_(p.data, alpha=weight_decay)    
-                p.data.add_(-lr, d_p)
+                p.data.add_(d_p, alpha=-lr)

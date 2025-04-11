@@ -1,4 +1,5 @@
 import os 
+import numpy as np
 import torch
 from torch.utils.data import Subset
 import torchvision.datasets as datasets
@@ -53,23 +54,67 @@ def MNIST_dataset_sample(p=0.43):
     sampled_test_set = sample_equal_classes(full_test_set)
     
     return sampled_train_set, sampled_test_set
+def balanced_subset(dataset, p_sample):
+    targets = np.array(dataset.targets)
+    unique_classes = np.unique(targets)
+    indices = []
 
-def CIFAR10_dataset():
+    for cls in unique_classes:
+        cls_indices = np.where(targets == cls)[0]
+        sampled_count = int(len(cls_indices) * p_sample)
+        sampled_indices = np.random.choice(cls_indices, sampled_count, replace=False)
+        indices.extend(sampled_indices)
+
+    return Subset(dataset, indices)
+        
+        
+def unbalanced_subset(dataset, p_sample):
+    '''
+    Args:
+        dataset (torch.utils.data.Dataset): The original dataset.
+        gammar (float): The long tail dataset, the rate to decrease 
+    '''        
+    targets = np.array(dataset.targets)
+    
+
+def CIFAR10_dataset(p_sample=1):
+    """Get CIFAR10 dataset, p_sample is the fraction of the data to sample.
+
+    Args:
+        p_sample (float, optional): Fraction of the data to sample (0 < p_sample <= 1). Defaults to 1.
+
+    Returns:
+        tuple: (train_set, test_set), where each is a torch.utils.data.Dataset.
+    """
     if not os.path.isdir("data"):
         os.mkdir("data")
-    # Download MNIST dataset and set the valset as the test test
-    transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
+    # Define transformation
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
+
+    # Load datasets
     test_set = datasets.CIFAR10('data/CIFAR10', download=True, train=False, transform=transform)
     train_set = datasets.CIFAR10("data/CIFAR10", download=True, train=True, transform=transform)
+
+    # If p_sample < 1, subsample the dataset
+    if p_sample < 1:
+        train_set = balanced_subset(train_set, p_sample)
+
     return train_set, test_set
 
-def CIFAR100_dataset():
+def CIFAR100_dataset(p_sample=1):
     if not os.path.isdir("data"):
         os.mkdir("data")
     # Download MNIST dataset and set the valset as the test test
     transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
     test_set = datasets.CIFAR100('data/CIFAR100', download=True, train=False, transform=transform)
     train_set = datasets.CIFAR100("data/CIFAR100", download=True, train=True, transform=transform)
+    if p_sample < 1:
+        train_set = balanced_subset(train_set, p_sample)
+    
     return train_set, test_set
 
 
@@ -80,9 +125,9 @@ def load_dataset(args):
         else:
             train_set, val_set = MNIST_dataset()
     elif args.dataset == "CIFAR10":
-        train_set, val_set = CIFAR10_dataset()
+        train_set, val_set = CIFAR10_dataset(p_sample=args.ratio)
     elif args.dataset == "CIFAR100":
-        train_set, val_set = CIFAR100_dataset()
+        train_set, val_set = CIFAR100_dataset(p_sample=args.ratio)
     else:
         raise ValueError("Unknown dataset")
     return train_set, val_set

@@ -1,0 +1,41 @@
+program: main.py  # 关键：指定入口脚本
+command:
+  - ${env}        # 继承当前环境变量
+  - python        # 使用python解释器
+  - ${program}    # 引用上面指定的main.py
+  - ${args}       # 自动注入所有超参数
+method: random  
+metric:
+  name: train_loss 
+  goal: minimize
+
+
+parameters:
+  optimizer:
+    values: ["SGD", "SVRG"]
+  nn_model:
+    values: ["CIFAR10_convnet"] 
+  dataset:
+    values: ["CIFAR10"]
+  n_epoch:
+    value: 500
+  lr:
+    values: [0.05, 0.01, 0.005]
+  min_lr:
+    value: 0.0001
+  batch_size:
+    values: [32, 64, 128]
+  weight_decay:
+    values: [0.0, 0.0001]
+  exp_name:
+    value: "sweep_experiment"
+  print_every:
+    value: 1
+  ratio:
+    value: 1.0
+  temperature:
+    values: [5, 10, 20, 30]
+  device:
+    value: "cuda:5"
+  wandb_project:
+    value: "svrg_sgd_cifar"

@@ -7,15 +7,10 @@ import numpy as np
 from torch.utils.data import Subset
 import matplotlib.pyplot as plt
 
-
-
-
-
-
-
-
-
-def groupwise_weights(model_k, train_loader_large, loss_fn, beta=0.5, device='cpu'):
+def groupwise_weights(
+    model_k, train_loader_large, loss_fn, beta=1, device='cpu'
+    # model_k, train_loader_large, loss_fn, beta=0.5, device='cpu'
+    ):
     """
     first calculate the loss of each label group wrt model_k
     then calculate each group's weight as softmax of -beta * loss
@@ -69,15 +64,16 @@ def calculate_loss(model, images, labels, weights, loss_fn, device):
     label_weights = torch.tensor([weights[label] for label in weights.keys()], dtype=torch.float32).to(device)
     yhat = model(images)
     loss_iter = loss_fn(weight=label_weights)(yhat, labels)
+    # loss_iter = loss_fn()(yhat, labels)
     return loss_iter, yhat
 
 def update_weights(model, train_loader_large, loss_fn, beta, device):
     return groupwise_weights(model, train_loader_large, loss_fn, beta=beta, device=device)
 
-def log_metrics(loss_iter, acc, metric):
+def log_metrics(loss_iter, acc, metric, iter):
     metric['loss'].update(loss_iter.data.item())
     metric['acc'].update(acc)
-    print(f"loss: {loss_iter.data.item()}, acc: {acc}")
+    print(f"iteration{iter}:loss: {loss_iter.data.item()}, acc: {acc}")
 
 def calculate_full_gradient(model, train_loader, start_weights, loss_fn, optimizer, device):
     model.train()

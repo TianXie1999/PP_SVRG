@@ -10,7 +10,7 @@ def get_args():
                         help="neural network model.")
     parser.add_argument('--dataset', type=str, default="MNIST",
                         help="neural network model.")
-    parser.add_argument('--n_epoch', type=int, default=100,
+    parser.add_argument('--n_epoch', type=int, default=1000,
                         help="number of training iterations.")
     parser.add_argument('--lr', type=float, default=0.001,
                         help="learning rate.")
@@ -34,6 +34,14 @@ def get_args():
     parser.add_argument('--log', action='store_true',
                         default=False,
                         help="whether log the results.")
+    parser.add_argument('--wandb', action='store_true', 
+                        default=False,
+                        help="whether to use wandb for logging.")
+    parser.add_argument('--wandb_project', type=str, default="svrg_sgd_cifar",
+                        help="wandb project name.")
+    parser.add_argument('--wandb_entity', type=str, default=None,
+                        help="wandb entity (team) name. If None, it will use the default entity.")
+
     
     
     #TODO: add more arguments

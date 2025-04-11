@@ -5,13 +5,34 @@ Implementation of **stochastic variance reduction gradient descent (SVRG)** for 
 
 template for running with SGD
 ```bash
-python main.py --optimizer SGD --dataset MNIST --nn_model one_layer --lr 0.001 --device 0 --log
+python main.py --optimizer SGD --dataset MNIST --nn_model one_layer --lr 0.003 --device 0 --log --temperature 5 --ratio 0.05
+python main.py --optimizer SVRG --dataset MNIST --nn_model one_layer --lr 0.003 --device 0 --log --temperature 5 --ratio 0.05
 ```
 
 template for running with SVRG
 ```bash
-python main.py --optimizer SVRG --lr 0.0001 --log # runnning SVRG on mnist 
-python main.py --optimizer SVRG --dataset CIFAR100 --nn_model resnet18 --lr 0.001 --log # running 
+python main.py --optimizer SVRG --lr 0.0001 --log # runnning SVRG
+python main.py --optimizer SVRG --dataset CIFAR100 --nn_model resnet18 --lr 0.001 --log --device 1 # running SVRG on CIFAR100 with ResNet18 on GPU 1
+python main.py --optimizer SVRG --dataset CIFAR100 --nn_model CIFAR100_convnet --lr 0.001 --log --device cuda:1 --batch_size  # running SVRG on CIFAR100 with LeNet on GPU 1
+python main.py --optimizer SVRG --dataset CIFAR10 --nn_model CIFAR10_convnet --lr 0.008 --log --device cuda:5 --batch_size 256 --temperature 5
+python main.py --optimizer SVRG --dataset CIFAR10 --nn_model CIFAR10_convnet --lr 0.005 --log --device cuda:5 --batch_size 5 --temperature 5 --ratio 0.1
+python main.py --optimizer SGD --dataset CIFAR10 --nn_model CIFAR10_convnet --lr 0.005 --log --device cuda:5 --batch_size 5 --temperature 5 --ratio 0.1
+python main.py --optimizer SVRG --dataset CIFAR10 --nn_model CIFAR10_convnet --lr 0.001 --log --device cuda:5 --batch_size 5 --temperature 5 --ratio 0.1
+python main.py --optimizer SGD --dataset CIFAR10 --nn_model CIFAR10_convnet --lr 0.001 --log --device cuda:5 --batch_size 5 --temperature 5 --ratio 0.1
+python main.py --optimizer SVRG --dataset CIFAR10 --nn_model CIFAR10_convnet --lr 0.01 --log --device cuda:5 --batch_size 5 --temperature 5 --ratio 0.1
+python main.py --optimizer SGD --dataset CIFAR10 --nn_model CIFAR10_convnet --lr 0.01 --log --device cuda:5 --batch_size 5 --temperature 5 --ratio 0.1
+
+python main.py --optimizer SVRG --dataset CIFAR10 --nn_model CIFAR10_convnet --lr 0.05 --log --device cuda:5 --batch_size 10 --temperature 5 --ratio 0.1
+python main.py --optimizer SGD --dataset CIFAR10 --nn_model CIFAR10_convnet --lr 0.05 --log --device cuda:5 --batch_size 10 --temperature 5 --ratio 0.1
+
+python main.py --optimizer SVRG --dataset CIFAR10 --nn_model CIFAR10_convnet --lr 0.05 --log --device cuda:5 --batch_size 100 --temperature 10 --ratio 0.1
+python main.py --optimizer SGD --dataset CIFAR10 --nn_model CIFAR10_convnet --lr 0.05 --log --device cuda:5 --batch_size 100 --temperature 10 --ratio 0.1
+
+python main.py --optimizer SVRG --dataset CIFAR10 --nn_model CIFAR10_convnet --lr 0.05 --log --device cuda:5 --batch_size 100 --temperature 20 --ratio 0.1
+python main.py --optimizer SGD --dataset CIFAR10 --nn_model CIFAR10_convnet --lr 0.05 --log --device cuda:5 --batch_size 100 --temperature 20 --ratio 0.1
+
+WANDB_AGENT_DISABLE_FLAPPING=true wandb agent --count 20 your_entity_name/svrg_sgd_cifar/abc123456 --python sweep.py
+
 
 ```
 
