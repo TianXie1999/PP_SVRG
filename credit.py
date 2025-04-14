@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 from optim import initialize_optimizer
 from dataset import load_dataset
 from models import initialize_model
-from utils import get_device, get_args, get_loss_fn, train_model, setup_output_directory, log_to_file
+from utils import get_device, get_args, get_loss_fn, train_credit_model, setup_output_directory, log_to_file
 import hydra
 import wandb
 
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     # setup output directory
     @log_to_file(os.path.join(log_dir, 'training.log'), log=args.log)
     def decorated_train_model(*args, **kwargs):
-        return train_model(*args, **kwargs)
+        return train_credit_model(*args, **kwargs)
     
     decorated_train_model(model, model_snapshot, optimizer, optimizer_snapshot, train_loader, 
                 train_loader_large, loss_fn, log_dir, n_epochs=args.n_epoch, optimize=args.optimizer,

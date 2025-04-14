@@ -13,7 +13,7 @@ from .metric import accuracy
 
 def train_one_epoch(model, optimizer, train_loader, train_loader_large, start_weights,
                     metric, loss_fn, model_snapshot=None, optimizer_snapshot=None,
-                    temperature=0.5, optimize='SGD', device='cpu'):
+                    temperature=0.5, optimize='SGD', device='cpu', update_weight=True):
 
     if optimize == 'SVRG':
         g = calculate_full_gradient(model_snapshot, train_loader, start_weights, loss_fn, 
@@ -54,13 +54,14 @@ def train_one_epoch(model, optimizer, train_loader, train_loader_large, start_we
             optimizer.step()  
         # Update weights
         # label_weights = torch.tensor([weights[label] for label in weights.keys()], dtype=torch.float32).to(device)
-        
-        with torch.no_grad():
-            weights = update_weights(model, train_loader_large, loss_fn, 
+        if update_weight:
+            with torch.no_grad():
+                weights = update_weights(model, train_loader_large, loss_fn, 
                                  temperature, device)
         # weights = update_weights(model, train_loader_large, loss_fn, 
                                 #  temperature, device)
-
+        else:
+            update_dataset(3, train_loader, model, device, alpha=0.1)
         # Log metrics
         acc = accuracy(yhat.cpu(), labels)
         log_metrics(loss_iter, acc, metric, i)
@@ -149,9 +150,9 @@ def train_credit_model(model, model_snapshot, optimizer, optimizer_snapshot, tra
     for epoch in range(n_epochs):
         t0 = time.time()
         train_loss, train_acc, grads, new_weights = train_one_epoch(
-                model, optimizer, train_loader, train_loader_large, start_weights, metrics, 
+                model, optimizer, train_loader, train_loader_large, None, metrics, 
                 loss_fn, model_snapshot, optimizer_snapshot, temperature, 
-                optimize=optimize, device=device
+                optimize=optimize, device=device, update_weight=False
             )
         if use_wandb:
             wandb.log({
@@ -181,7 +182,6 @@ def train_credit_model(model, model_snapshot, optimizer, optimizer_snapshot, tra
             
             
 
-        start_weights = new_weights
 
         if (epoch + 1) % 1 == 0 and log:
             df.to_csv(os.path.join(log_dir, 'train_stats.csv'))

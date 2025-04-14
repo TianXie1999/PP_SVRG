@@ -32,14 +32,21 @@ python main.py --optimizer SVRG --dataset CIFAR10 --nn_model CIFAR10_convnet --l
 python main.py --optimizer SGD --dataset CIFAR10 --nn_model CIFAR10_convnet --lr 0.05 --log --device cuda:5 --batch_size 100 --temperature 20 --ratio 0.1
 
 WANDB_AGENT_DISABLE_FLAPPING=true wandb agent --count 20 your_entity_name/svrg_sgd_cifar/abc123456 --python sweep.py
-
-
 ```
+
+
+## Creidt dataset 
+If you want to run with the credit dataset, please use the following command
+```
+python credit.py --dataset credit --nn_model mlp --ratio 1
+```
+The dataset is from ![kaggle](https://www.kaggle.com/c/GiveMeSomeCredit)
+
 
 Up to now, the support args
 - --optimizer: ['SGD','SVRG']. The optimizer to be used.
 - --nn_model:
-- --dataset: ['MNIST', 'CIFAR10', 'CIFAR100']. The dataset to be used.
+- --dataset: ['MNIST', 'CIFAR10', 'CIFAR100', 'credit']. The dataset to be used.
 - --n_epochs: Int. Number of training iterations.
 - --lr: float. Learning rate.
 - --batch_size: Int. Batch size.

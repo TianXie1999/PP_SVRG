@@ -61,7 +61,10 @@ def groupwise_weights(
 def calculate_loss(model, images, labels, weights, loss_fn, device):
     images = images.to(device)
     labels = labels.to(device)
-    label_weights = torch.tensor([weights[label] for label in weights.keys()], dtype=torch.float32).to(device)
+    if weights is not None:
+        label_weights = torch.tensor([weights[label] for label in weights.keys()], dtype=torch.float32).to(device)
+    else:
+        label_weights = None
     yhat = model(images)
     loss_iter = loss_fn(weight=label_weights)(yhat, labels)
     # loss_iter = loss_fn()(yhat, labels)
@@ -91,18 +94,48 @@ def calculate_full_gradient(model, train_loader, start_weights, loss_fn, optimiz
     print("full gradient norm: ", g)
     return g
 
+# def update_dataset(columns, dataloader, model, device, alpha=0.1):
+#     model.eval()
+
+#     dataset = dataloader.dataset  
+    
+#     all_data = dataset.data.to(device)  
+#     all_labels = dataset.labels.to(device)
+
+#     for idx in range(0, len(dataset), dataloader.batch_size):
+#         end_idx = min(idx + dataloader.batch_size, len(dataset)) 
+#         i_data = all_data[idx:end_idx]
+#         labels = all_labels[idx:end_idx]
+
+#         i_data = i_data.clone().detach().requires_grad_(True)
+
+#         outputs = model(i_data)
+#         loss = F.cross_entropy(outputs, labels)
+#         loss.backward()
+
+#         grads = i_data.grad
+#         i_data_updated = i_data.clone().detach()
+#         i_data_updated[:, :columns] += alpha * grads[:, :columns]
+#         dataset.data[idx:end_idx] = i_data_updated.detach().cpu()
+
+
+        
 def update_dataset(columns, dataloader, model, device, alpha=0.1):
     model.eval()
 
-    dataset = dataloader.dataset  
-    
-    all_data = dataset.data.to(device)  
-    all_labels = dataset.labels.to(device)
+    dataset = dataloader.dataset  # Subset 对象
+    full_dataset = dataset.dataset  # 原始 Dataset
+    indices = dataset.indices      # Subset 的索引列表
 
-    for idx in range(0, len(dataset), dataloader.batch_size):
-        end_idx = min(idx + dataloader.batch_size, len(dataset)) 
-        i_data = all_data[idx:end_idx]
-        labels = all_labels[idx:end_idx]
+    # 假设 full_dataset.data 和 full_dataset.labels 是 Tensor
+    all_data = full_dataset.data[indices].to(device)
+    all_labels = full_dataset.labels[indices].to(device)
+
+    batch_size = dataloader.batch_size
+    for i, idx in enumerate(range(0, len(indices), batch_size)):
+        end_idx = min(idx + batch_size, len(indices))
+        i_data = all_data[i * batch_size : (i + 1) * batch_size]
+        labels = all_labels[i * batch_size : (i + 1) * batch_size]
 
         i_data = i_data.clone().detach().requires_grad_(True)
 
@@ -113,9 +146,8 @@ def update_dataset(columns, dataloader, model, device, alpha=0.1):
         grads = i_data.grad
         i_data_updated = i_data.clone().detach()
         i_data_updated[:, :columns] += alpha * grads[:, :columns]
-        dataset.data[idx:end_idx] = i_data_updated.detach().cpu()
 
+        # 回写更新后的数据到 full_dataset 中
+        full_dataset.data[indices[i * batch_size : (i + 1) * batch_size]] = i_data_updated.detach().cpu()
 
-        
-        
      
