@@ -205,7 +205,7 @@ class AverageCalculator():
         
 def setup_output_directory(args):
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    model_name = f"{timestamp}_{args.optimizer}_{args.nn_model}_Temperature{str(args.temperature)}_lr{str(args.lr)}"
+    model_name = f"{timestamp}_{args.optimizer}_{args.dataset}_{args.nn_model}_Temperature{str(args.temperature)}_lr{str(args.lr)}"
     
     if args.log:
         if args.exp_name != "":

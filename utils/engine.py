@@ -61,7 +61,7 @@ def train_one_epoch(model, optimizer, train_loader, train_loader_large, start_we
         # weights = update_weights(model, train_loader_large, loss_fn, 
                                 #  temperature, device)
         else:
-            update_dataset(3, train_loader, model, device, alpha=0.1)
+            update_dataset(3, train_loader, model, device, alpha=temperature)
         # Log metrics
         acc = accuracy(yhat.cpu(), labels)
         log_metrics(loss_iter, acc, metric, i)
@@ -75,7 +75,7 @@ def train_one_epoch(model, optimizer, train_loader, train_loader_large, start_we
 
 def train_model(model, model_snapshot, optimizer, optimizer_snapshot, train_loader, 
                 train_loader_large, loss_fn, log_dir, n_epochs, optimize,
-                print_interval, temperature, device, log, use_wandb):
+                print_interval, temperature, device, log, use_wandb, update_weight, *args, **kwargs):
     
     start_weights = update_weights(model, train_loader_large, loss_fn, beta=temperature, device=device)
     metrics = {
@@ -136,7 +136,7 @@ def train_credit_model(model, model_snapshot, optimizer, optimizer_snapshot, tra
                 train_loader_large, loss_fn, log_dir, n_epochs, optimize,
                 print_interval, temperature, device, log, use_wandb):
     
-    update_dataset(3, train_loader, model, device, alpha=0.1)
+    update_dataset(3, train_loader, model, device, alpha=temperature)
     
     metrics = {
         'loss': AverageCalculator(),

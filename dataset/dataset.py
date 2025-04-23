@@ -71,14 +71,26 @@ def balanced_subset(dataset, p_sample):
     return Subset(dataset, indices)
         
         
-def unbalanced_subset(dataset, p_sample):
-    '''
+def longtail_subset(dataset, alpha=0.8):
+    """
+    make a balanced dataset into a longtail dataset 
     Args:
-        dataset (torch.utils.data.Dataset): The original dataset.
-        gammar (float): The long tail dataset, the rate to decrease 
-    '''        
+        dataset (Dataset): dataset to be sampled
+        alpha (float): longtail parameter, we keep 1 * alpha ^ i of the data in class i 
+    """ 
     targets = np.array(dataset.targets)
-    
+    unique_classes = np.unique(targets)
+    indices = []
+
+    for i, cls in enumerate(unique_classes):
+        cls_indices = np.where(targets == cls)[0]
+        sampled_count = int(len(cls_indices) * (1 * alpha ** i))
+        sampled_indices = np.random.choice(cls_indices, sampled_count, replace=False)
+        indices.extend(sampled_indices)
+    # showcase each class size
+    class_sizes = {cls: len(np.where(targets[indices] == cls)[0]) for cls in unique_classes}
+    print("class sizes: ", class_sizes)
+    return Subset(dataset, indices)
 
 def CIFAR10_dataset(p_sample=1):
     """Get CIFAR10 dataset, p_sample is the fraction of the data to sample.
@@ -185,8 +197,15 @@ class CreditDataset(Dataset):
 
         
         self.data = torch.tensor(data[combined_idx], dtype=torch.float32)
+        self._standardize_data()
         self.labels = torch.tensor(labels[combined_idx], dtype=torch.int64) 
             
+    def _standardize_data(self):
+        mean = self.data.mean(dim=0)
+        std = self.data.std(dim=0)
+        self.data = (self.data - mean) / std
+        self.data = torch.nan_to_num(self.data, nan=0.0, posinf=1.0, neginf=-1.0)
+        
     def __len__(self):
         return len(self.data)
     def __getitem__(self, idx):

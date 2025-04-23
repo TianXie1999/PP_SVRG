@@ -6,7 +6,7 @@ Implementation of **stochastic variance reduction gradient descent (SVRG)** for 
 template for running with SGD
 ```bash
 python main.py --optimizer SGD --dataset MNIST --nn_model one_layer --lr 0.003 --device 0 --log --temperature 5 --ratio 0.05
-python main.py --optimizer SVRG --dataset MNIST --nn_model one_layer --lr 0.003 --device 0 --log --temperature 5 --ratio 0.05
+python main.py --optimizer SVRG --dataset MNIST --nn_model one_layer --lr 0.003 --device 0 --log --temperature 5 --ratio 0.05 --batch_size 32
 ```
 
 template for running with SVRG
@@ -33,12 +33,12 @@ python main.py --optimizer SGD --dataset CIFAR10 --nn_model CIFAR10_convnet --lr
 
 WANDB_AGENT_DISABLE_FLAPPING=true wandb agent --count 20 your_entity_name/svrg_sgd_cifar/abc123456 --python sweep.py
 ```
-
+python main.py --optimizer SVRG --dataset MNIST --nn_model one_layer --lr 0.003 --device 0 --log --temperature 50 --ratio 0.05 --batch_size 100
 
 ## Creidt dataset 
 If you want to run with the credit dataset, please use the following command
 ```
-python credit.py --dataset credit --nn_model mlp --ratio 1
+python credit.py --dataset credit --nn_model mlp --ratio 1 --log --optimizer SVRG
 ```
 The dataset is from ![kaggle](https://www.kaggle.com/c/GiveMeSomeCredit)
 
